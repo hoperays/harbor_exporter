@@ -3,15 +3,18 @@ FROM golang:1.13-alpine AS builder
 ENV GO111MODULE=on \
   CGO_ENABLED=0 \
   GOOS=linux \
-  GOARCH=amd64
+  GOPROXY="http://goproxy.easystack.io,https://goproxy.cn,https://goproxy.io,direct"
 
+RUN sed -e 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' -i /etc/apk/repositories
 RUN apk add make git
 WORKDIR /src
 COPY . .
 
 RUN make build
 
-FROM alpine:latest
+FROM alpine:3.18.2
+
+RUN sed -e 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' -i /etc/apk/repositories
 RUN apk --no-cache add ca-certificates
 
 RUN addgroup -g 1001 appgroup && \
